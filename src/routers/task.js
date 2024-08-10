@@ -3,8 +3,6 @@ import {Task} from '../models/task.js'
 
 const router = new express.Router();
 
-// -------------------- Task
-
 router.post('/tasks', async (req, res) => {
     const task = new Task(req.body);
 
@@ -54,12 +52,14 @@ router.patch('/tasks/:id', async (req, res) => {
     }
 
     try {
-        const task = await Task.findByIdAndUpdate(req.params.id,
-                                                  req.body,
-                                                  {
-                                                    new: true,
-                                                    runValidators: true
-                                                  });
+        const task = await Task.findById(req.params.id);
+
+        updates.forEach((update) => {
+            task[update] = req.body[update];
+        });
+
+        await task.save();
+
         if (!task) {
             res.status(400).send();
         }
