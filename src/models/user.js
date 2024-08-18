@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 import validator from 'validator';
+import jsonwebtoken from 'jsonwebtoken';
 
 const userSchema = new mongoose.Schema(
     {
@@ -12,6 +13,7 @@ const userSchema = new mongoose.Schema(
         email: {
             type: String,
             required: true,
+            unique: true,
             trim: true,
             lowercase: true,
             validate (value) {
@@ -39,10 +41,46 @@ const userSchema = new mongoose.Schema(
                     throw new Error('Password cannot contain "password"');
                 }
             }
-        }
+        },
+        tokens: [{
+            token: {
+                type: String,
+                required: true
+            }
+        }]
     }
 );
 
+userSchema.methods.generateAuthToken = async function() {
+    // need access to this
+    // This is an instance method
+    const user = this;
+    const token = jsonwebtoken.sign({_id: user._id.toString()},'thisismynewcourse');
+
+    // Save token to database
+    user.tokens = user.tokens.concat({token: token});
+    await user.save();
+
+    return token;
+}
+
+userSchema.statics.findByCredentials = async (email, password) => {
+    const user = await User.findOne({email: email});
+
+    if (!user) {
+        throw new Error('Unable to login');
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+        throw new Error('Unable to login');
+    }
+
+    return user;
+}
+
+// Has the plaintext password before saving
 userSchema.pre('save', async function (next) {
     const user = this;
 

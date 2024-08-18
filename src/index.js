@@ -9,6 +9,19 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
+// middleware 
+// app.use((req, res, next) => {
+//     if (req.method === 'GET') {
+//         res.send('GET requests are disabled');
+//     } else {
+//         next();
+//     }
+// });
+
+// app.use((req, res, next) => {
+//     res.status(503).send('Web Site Maintanence Underway. Try again later!');
+// });
+
 // Routes for Express to respond to
 app.use(userRouter);
 app.use(taskRouter);
@@ -18,17 +31,12 @@ app.listen(port, () => {
     console.log('Server is up on port '+ port);
 });
 
-import bcrypt from 'bcrypt';
-
 const myFunction = async () => {
-    const password = 'Red12345!';
-    const hashPassword = await bcrypt.hash(password, 8);
+    // const token = jsonwebtoken.sign({_id: 'abc123'}, 'thisismynewcourse', {expiresIn: '0s'});
+    // console.log(token);
 
-    console.log(password);
-    console.log(hashPassword);
-
-    const isMatch = await bcrypt.compare('Red12345!', hashPassword);
-    console.log(isMatch);
+    // const data = jsonwebtoken.verify(token, 'thisismynewcourse');
+    // console.log(data);
 }
 
 myFunction();
