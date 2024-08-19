@@ -28,6 +28,32 @@ router.post('/users/login', async (req, res) => {
     }
 });
 
+router.post('/users/logout', auth, async(req, res) => {
+    try {
+        // Iterate over the tokens and save those that do no match current session
+        req.user.tokens = req.user.tokens.filter((token) => {
+            return token.token !== req.token;
+        });
+        await req.user.save();
+
+        res.send();
+    } catch (error) {
+        res.status(500).send();
+    }
+});
+
+// Remove all auth tokens ultimately logging all devices out for the logged in user
+router.post('/users/logoutAll', auth, async (req, res) => {
+    try {
+        req.user.tokens = [];
+        await req.user.save();
+        res.send();
+    } catch (error) {
+        res.status(500).send();
+    }
+});
+
+// Fetch user's profile
 router.get('/users/me', auth, async (req, res) => {
     res.send(req.user);
 });
