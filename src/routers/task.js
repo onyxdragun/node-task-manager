@@ -20,13 +20,23 @@ router.post('/tasks', auth, async (req, res) => {
 });
 
 // Fetch all tasks for a logged in user
+
+// GET /tasks?completed=false||true
 router.get('/tasks', auth, async (req, res) => {
+    const match = {};
+
+    if (req.query.completed) {
+        match.completed = req.query.completed === 'true'
+    }
 
     try {
         // Alternative to fetch all tasks for a user
         //const tasks = await Task.find({owner: req.user._id});
 
-        await req.user.populate('tasks');
+        await req.user.populate({
+            path: 'tasks',
+            match
+        });
         res.send(req.user.tasks);
     } catch(error) {
         res.status(500).send();
