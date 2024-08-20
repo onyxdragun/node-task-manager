@@ -53,7 +53,7 @@ const userSchema = new mongoose.Schema({
     timestamps: true
 });
 
-//----------- Virtual Properties
+//----------- Virtual Properties ----------------------------------------------
 
 userSchema.virtual('tasks', {
     ref: 'Task',
@@ -61,7 +61,7 @@ userSchema.virtual('tasks', {
     foreignField: 'owner'
 });
 
-//----------- Instance Methods
+//----------- Instance Methods ----------------------------------------------
 
 userSchema.methods.toJSON = function () {
     const user = this;
@@ -85,7 +85,7 @@ userSchema.methods.generateAuthToken = async function() {
     return token;
 }
 
-//----------- Model Methods
+//----------- Model Methods ----------------------------------------------
 
 userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({email: email});
@@ -103,7 +103,7 @@ userSchema.statics.findByCredentials = async (email, password) => {
     return user;
 }
 
-//----------- Middleware
+//----------- Middleware ----------------------------------------------
 
 // Has the plaintext password before saving
 userSchema.pre('save', async function (next) {

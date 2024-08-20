@@ -4,7 +4,9 @@ import {auth} from '../middleware/auth.js';
 
 const router = new express.Router();
 
+//
 // Create a task for a logged in user
+//
 router.post('/tasks', auth, async (req, res) => {
     const task = new Task({
         ...req.body,
@@ -19,23 +21,35 @@ router.post('/tasks', auth, async (req, res) => {
     }
 });
 
-// Fetch all tasks for a logged in user
-
-// GET /tasks?completed=false||true
+//
+// Fetch tasks for a logged in user
+//
+// GET /tasks?completed=false || true
+// GET /tasks?limit=X&skip=X  <-- for Pagination
+// GET /tasks?sortBy=createAt&orderBy=asc (1) || dsc (-1)
 router.get('/tasks', auth, async (req, res) => {
     const match = {};
+    const sort = {};
 
     if (req.query.completed) {
         match.completed = req.query.completed === 'true'
     }
 
+    if (req.query.sortBy) {
+        sort[req.query.sortBy] = req.query.orderBy === 'asc' ? 1 : -1;
+    }
+
     try {
         // Alternative to fetch all tasks for a user
         //const tasks = await Task.find({owner: req.user._id});
-
         await req.user.populate({
             path: 'tasks',
-            match
+            match,
+            options: {
+                limit: parseInt(req.query.limit),
+                skip: parseInt(req.query.skip),
+                sort
+            }
         });
         res.send(req.user.tasks);
     } catch(error) {
@@ -43,7 +57,9 @@ router.get('/tasks', auth, async (req, res) => {
     }
 });
 
+//
 // Fetch a specific task by a user
+//
 router.get('/tasks/:id', auth, async (req, res) => {
     const _id = req.params.id;
     
@@ -60,8 +76,9 @@ router.get('/tasks/:id', auth, async (req, res) => {
     }
 });
 
-
+//
 // Update a user's task
+//
 router.patch('/tasks/:id', auth, async (req, res) => {
     // Provide user with some info if their data doesn't
     // match what is in the document
@@ -93,7 +110,9 @@ router.patch('/tasks/:id', auth, async (req, res) => {
     }
 });
 
+//
 // Delete a task for a logged in user
+//
 router.delete('/tasks/:id', auth, async (req, res) => {
     try {
         const task = await Task.findOneAndDelete({_id: req.params.id, owner: req.user._id});

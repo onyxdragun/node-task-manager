@@ -4,6 +4,9 @@ import {auth} from '../middleware/auth.js'
 
 const router = new express.Router();
 
+//
+// Create a new user
+//
 router.post('/users', async (req, res) => {
     const user = new User(req.body);
 
@@ -16,6 +19,9 @@ router.post('/users', async (req, res) => {
     }
 });
 
+//
+// Login a user
+//
 router.post('/users/login', async (req, res) => {
     try {
         // findByCredentials is a custom func in model
@@ -27,6 +33,9 @@ router.post('/users/login', async (req, res) => {
     }
 });
 
+//
+// Logout a user
+//
 router.post('/users/logout', auth, async(req, res) => {
     try {
         // Iterate over the tokens and save those that do no match current session
@@ -41,7 +50,9 @@ router.post('/users/logout', auth, async(req, res) => {
     }
 });
 
+//
 // Remove all auth tokens ultimately logging all devices out for the logged in user
+//
 router.post('/users/logoutAll', auth, async (req, res) => {
     try {
         req.user.tokens = [];
@@ -52,12 +63,16 @@ router.post('/users/logoutAll', auth, async (req, res) => {
     }
 });
 
+//
 // Fetch user's profile
+//
 router.get('/users/me', auth, async (req, res) => {
     res.send(req.user);
 });
 
+//
 // Update a user
+//
 router.patch('/users/me', auth, async (req, res) => {
     // Provide user with some info if their data doesn't
     // match what is in the document
@@ -83,7 +98,10 @@ router.patch('/users/me', auth, async (req, res) => {
     }
 });
 
+//
 // Removes a user completely
+// This also deletes all of their tasks too
+//
 router.delete('/users/me', auth, async (req, res) => {
     try {
         await req.user.deleteOne();
