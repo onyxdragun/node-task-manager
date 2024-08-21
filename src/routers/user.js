@@ -1,8 +1,25 @@
 import express from 'express';
+import multer from 'multer';
+
 import {User} from '../models/user.js'
 import {auth} from '../middleware/auth.js'
 
 const router = new express.Router();
+
+// Configure Multer
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage,
+    limits: {
+        fileSize:  1024 * 1024 // 1MB
+    },
+    fileFilter: async (req, file, cb) => {
+        if (!['image/jpeg', 'image/png'].includes(file.mimetype)) {
+            return cb(new Error('Invalid file type. Only JPEG and PNG are allowed'));
+        }
+        cb(undefined, true);
+    }
+});
 
 //
 // Create a new user
@@ -61,6 +78,26 @@ router.post('/users/logoutAll', auth, async (req, res) => {
     } catch (error) {
         res.status(500).send();
     }
+});
+
+//
+// Upload a user image
+//
+router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
+    req.user.avatar = req.file.buffer;
+    await req.user.save();
+    res.send();
+}, (error, req, res, next) => {
+    res.status(400).send({error: error.message});
+});
+
+//
+// Delete a user image
+//
+router.delete('/users/me/avatar', auth, async (req, res) => {
+    req.user.avatar = undefined;
+    await req.user.save();
+    res.send();
 });
 
 //
