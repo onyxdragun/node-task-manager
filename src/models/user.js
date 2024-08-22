@@ -80,7 +80,7 @@ userSchema.methods.toJSON = function () {
 userSchema.methods.generateAuthToken = async function() {
     // need access to this
     const user = this;
-    const token = jsonwebtoken.sign({_id: user._id.toString()},'thisismynewcourse');
+    const token = jsonwebtoken.sign({_id: user._id.toString()}, process.env.JWT_SECRET);
 
     // Save token to database
     user.tokens = user.tokens.concat({token: token});
